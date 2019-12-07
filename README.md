@@ -1,6 +1,6 @@
 # asdf-aws-vault
 
-[![Build Status](https://dev.azure.com/beardix/asdf/_apis/build/status/beardix.asdf-aws-vault?branchName=master)](https://dev.azure.com/beardix/asdf/_build/latest?definitionId=12&branchName=master)
+![](https://github.com/beardix/asdf-aws-vault/workflows/ci/badge.svg)
 
 [aws-vault](https://github.com/99designs/aws-vault) plugin for the [asdf](https://github.com/asdf-vm/asdf) version manager.
 
