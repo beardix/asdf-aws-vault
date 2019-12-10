@@ -21,8 +21,15 @@ install() {
   local -r install_version="$2"
   local -r install_path="$3"
   local -r install_path_bin="${install_path}/bin"
-  local -r platform="$(uname | tr '[:upper:]' '[:lower:]')-amd64"
-  local -r download_url="${DOWNLOAD_BASE_URL}/v${install_version}/${BINARY_NAME}-${platform}"
+  local -r platform_name="$(uname | tr '[:upper:]' '[:lower:]')"
+  local -r platform="${platform_name}-amd64"
+  local extension=""
+  if [ "${platform_name}" == "darwin" ]; then
+    if [[ "${install_version}" != 3* ]] && [[ ! "${install_version}" =~ 4\.[0-6]\..* ]]; then
+      extension=".dmg"
+    fi
+  fi
+  local -r download_url="${DOWNLOAD_BASE_URL}/v${install_version}/${BINARY_NAME}-${platform}${extension}"
   local -r download_path="${TMP_DOWNLOAD_DIR}/${BINARY_NAME}"
 
   [ "$install_type" != "version" ] && error_exit "Error: source installs are not supported"
@@ -31,8 +38,14 @@ install() {
   if curl -fL -o "$download_path" "$download_url"; then
     echo "Installing binary"
     mkdir -p "$install_path_bin"
-    mv "$download_path" "${install_path_bin}/${BINARY_NAME}"
-    chmod +x "${install_path_bin}/${BINARY_NAME}"
+    if [ "${extension}" == ".dmg" ]; then
+      hdiutil mount -quiet -mountpoint $install_path_bin/tmp_dmg $download_path
+      cp $install_path_bin/tmp_dmg/aws-vault "${install_path_bin}/${BINARY_NAME}"
+      hdiutil unmount -quiet $install_path_bin/tmp_dmg
+    else
+      mv "$download_path" "${install_path_bin}/${BINARY_NAME}"
+      chmod +x "${install_path_bin}/${BINARY_NAME}"
+    fi
   else
     error_exit "Error: ${BINARY_NAME} version ${install_version} not found"
   fi
